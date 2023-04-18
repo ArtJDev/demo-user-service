@@ -1,7 +1,10 @@
 package com.example.demouserservice;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.MappedCollection;
 import org.springframework.data.relational.core.mapping.Table;
+
+import java.util.List;
 
 @Table("users")
 public record User(
@@ -11,9 +14,9 @@ public record User(
         String firstName,
         String lastName,
         int rating,
-        String phoneNumber
+        String phoneNumber,
+        @MappedCollection(idColumn = "id")
+        List<String> roles
 ) {
-    public User of (String username, String firstName, String lastName, int rating, String phoneNumber) {
-        return new User(null, username, firstName, lastName, rating, phoneNumber);
-    }
+
 }

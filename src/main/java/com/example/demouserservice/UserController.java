@@ -1,5 +1,9 @@
 package com.example.demouserservice;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -24,8 +28,13 @@ public class UserController {
     }
 
     @GetMapping("/users/{id}")
-    public Mono<User> getUser(@PathVariable Long id) {
+    public Mono<ResponseEntity<User>> getUser(@PathVariable Long id) {
         return userService.getUser(id);
+    }
+    @GetMapping("/users/profile")
+    public Mono<User> getProfile() {
+        return null;
+//        return userService.getProfile(oidcUser);
     }
 
     @PutMapping("/users/{id}")

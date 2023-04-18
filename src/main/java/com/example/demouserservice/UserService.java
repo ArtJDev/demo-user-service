@@ -1,5 +1,7 @@
 package com.example.demouserservice;
 
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -24,16 +26,33 @@ public class UserService {
                         userDto.firstName(),
                         userDto.lastName(),
                         userDto.rating(),
-                        userDto.phoneNumber()))
+                        userDto.phoneNumber(),
+                        null))
                 .flatMap(userRepository::save)
                 .doOnError(error -> {
                     throw new RuntimeException("Пользователь с таким именем уже существует");
                 });
     }
 
-    public Mono<User> getUser(Long id) {
-        return userRepository.findById(id);
+    public Mono<ResponseEntity<User>> getUser(Long id) {
+        return userRepository.findById(id)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
+
+    public Mono<User> getProfile(OidcUser oidcUser) {
+        return userRepository.findByUsername(oidcUser.getPreferredUsername())
+                .defaultIfEmpty(new User(null,
+                        oidcUser.getPreferredUsername(),
+                        oidcUser.getGivenName(),
+                        oidcUser.getFamilyName(),
+                        5,
+                        null,
+                        oidcUser.getClaimAsStringList("roles")))
+                .flatMap(userRepository::save);
+    }
+
+
 
     public Mono<User> updateUser(Long id, User user) {
         return userRepository.findById(id)
@@ -43,7 +62,8 @@ public class UserService {
                         user.firstName(),
                         user.lastName(),
                         user.rating(),
-                        user.phoneNumber()))
+                        user.phoneNumber(),
+                        user.roles()))
                 .flatMap(userRepository::save)
                 .doOnError(error -> {
                     throw new RuntimeException("Имя пользователя изменять нельзя!");
