@@ -1,7 +1,6 @@
 package com.example.demouserservice;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -10,6 +9,7 @@ import reactor.core.publisher.Mono;
 public class UserService {
 
     private final UserRepository userRepository;
+
 
     public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
@@ -40,15 +40,15 @@ public class UserService {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-    public Mono<User> getProfile(OidcUser oidcUser) {
-        return userRepository.findByUsername(oidcUser.getPreferredUsername())
-                .defaultIfEmpty(new User(null,
-                        oidcUser.getPreferredUsername(),
-                        oidcUser.getGivenName(),
-                        oidcUser.getFamilyName(),
-                        5,
-                        null,
-                        oidcUser.getClaimAsStringList("roles")))
+    public Mono<User> getProfile(String token) {
+        return userRepository.findByUsername(token)
+//                .defaultIfEmpty(new User(null,
+//                token.getUsername(),
+//                token.getFirstName(),
+//                token.getLastName(),
+//                        5,
+//                        null,
+//                token.getRoles()))
                 .flatMap(userRepository::save);
     }
 
