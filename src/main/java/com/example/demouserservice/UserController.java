@@ -1,6 +1,8 @@
 package com.example.demouserservice;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -28,11 +30,10 @@ public class UserController {
     public Mono<ResponseEntity<User>> getUser(@PathVariable Long id) {
         return userService.getUser(id);
     }
+
     @GetMapping("/users/profile")
-    public Mono<User> getProfile() {
-//        String token =
-//        return userService.getProfile(token);
-        return null;
+    public Mono<User> getProfile(@AuthenticationPrincipal Jwt principal) {
+        return userService.getProfile(principal);
     }
 
     @PutMapping("/users/{id}")

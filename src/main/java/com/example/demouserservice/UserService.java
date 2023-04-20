@@ -1,15 +1,16 @@
 package com.example.demouserservice;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.Map;
+
 @Service
 public class UserService {
-
     private final UserRepository userRepository;
-
 
     public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
@@ -40,19 +41,18 @@ public class UserService {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-    public Mono<User> getProfile(String token) {
-        return userRepository.findByUsername(token)
-//                .defaultIfEmpty(new User(null,
-//                token.getUsername(),
-//                token.getFirstName(),
-//                token.getLastName(),
-//                        5,
-//                        null,
-//                token.getRoles()))
-                .flatMap(userRepository::save);
+    public Mono<User> getProfile(Jwt principal) {
+        Map<String, Object> claims = principal.getClaims();
+        User user = new User(null,
+                claims.get("preferred_username").toString(),
+                claims.get("given_name").toString(),
+                claims.get("family_name").toString(),
+                5,
+                null,
+                principal.getClaimAsStringList("roles"));
+        return userRepository.save(user).onErrorReturn(user);
+
     }
-
-
 
     public Mono<User> updateUser(Long id, User user) {
         return userRepository.findById(id)

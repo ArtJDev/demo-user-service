@@ -18,5 +18,4 @@ public record User(
         @MappedCollection(idColumn = "id")
         List<String> roles
 ) {
-
 }
