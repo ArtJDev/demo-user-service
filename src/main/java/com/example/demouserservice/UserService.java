@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -21,15 +22,17 @@ public class UserService {
         return userRepository.findAll();
     }
 
-    public Mono<User> saveUser(UserDto userDto) {
-        return userRepository.findByUsername(userDto.username())
+    public Mono<User> saveUser(User user) {
+        List<String> roles = new ArrayList<>();
+        roles.add("user");
+        return userRepository.findByUsername(user.username())
                 .map(createdUser -> new User(null,
-                        userDto.username(),
-                        userDto.firstName(),
-                        userDto.lastName(),
-                        userDto.rating(),
-                        userDto.phoneNumber(),
-                        null))
+                        user.username(),
+                        user.firstName(),
+                        user.lastName(),
+                        user.rating(),
+                        user.phoneNumber(),
+                        roles))
                 .flatMap(userRepository::save)
                 .doOnError(error -> {
                     throw new RuntimeException("Пользователь с таким именем уже существует");
@@ -56,20 +59,18 @@ public class UserService {
 
     }
 
-    public Mono<User> updateUser(Long id, User user) {
+    public Mono<User> updateUser(Long id, UserDto userDto) {
         return userRepository.findById(id)
-                .map(updatedUser -> new User(
-                        user.id(),
-                        user.username(),
-                        user.firstName(),
-                        user.lastName(),
-                        user.rating(),
-                        user.phoneNumber(),
-                        user.roles()))
-                .flatMap(userRepository::save)
-                .doOnError(error -> {
-                    throw new RuntimeException("Имя пользователя изменять нельзя!");
-                });
+                .map(existUser -> new User(
+                        existUser.id(),
+                        existUser.username(),
+                        userDto.firstName(),
+                        userDto.lastName(),
+                        userDto.rating(),
+                        userDto.phoneNumber(),
+                        existUser.roles()))
+                .flatMap(userRepository::save);
+
     }
 
     public Mono<Void> deleteUser(Long id) {

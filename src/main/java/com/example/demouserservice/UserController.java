@@ -22,8 +22,8 @@ public class UserController {
     }
 
     @PostMapping("/users")
-    public Mono<User> saveUser(@RequestBody UserDto userDto) {
-        return userService.saveUser(userDto);
+    public Mono<User> saveUser(@RequestBody User user) {
+        return userService.saveUser(user);
     }
 
     @GetMapping("/users/{id}")
@@ -37,8 +37,8 @@ public class UserController {
     }
 
     @PutMapping("/users/{id}")
-    public Mono<User> updateUser(@PathVariable Long id, @RequestBody User user) {
-        return userService.updateUser(id, user);
+    public Mono<User> updateUser(@PathVariable Long id, @RequestBody UserDto userDto) {
+        return userService.updateUser(id, userDto);
     }
 
     @DeleteMapping("/user/{id}")
